@@ -3,6 +3,8 @@
 % Input: birds, a
 function [] = viz(birdsList,interval)
 
+numBirds = size(birdsList{1},1);
+
 % Check number of inputs.
 if nargin == 1
     interval = 1;
@@ -12,7 +14,7 @@ side_length = 1;
 
   for i=1:interval:length(birdsList)
     %% draw all birds in frame i
-    for j=1:length(birdsList{i})
+    for j=1:numBirds
       fprintf('Drawing \n')
       rectangle('Position',...
                 [birdsList{i}(j,1),...

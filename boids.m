@@ -2,7 +2,7 @@
 %% CS250
 %% Final Project
 
-numBirds = 20;
+numBirds = 2;
 
 %% Bird vars
 max_speed = 20; %m/s
