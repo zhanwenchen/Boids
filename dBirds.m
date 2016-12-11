@@ -13,6 +13,8 @@ function [d] = dBirds(birds)
   rand_sign = @(n) ones(n, 1) - floor(rand(n,1)*2)*2; % pick -1 or 1, n by 1
   rand_speed = @(n) (rand(n,1) - 0.5) * 2 * max_speed; % [-max_speed, max_speed]
 
+  % d = zeros(numBirds,4);
+
   %% Collision with border
   % If a single bird collides into the border with last round's speed
   % 1. keep last speed magnitude
@@ -24,8 +26,8 @@ function [d] = dBirds(birds)
   %     bird.dx = -bird.dx * rand; % rand: turn any degree
   %     bird.dy = dy(bird.dx) % adjust v_y with random turn to keep last
   %                             speed magnitude
-  
 
+  %% Each bird
   for i=1:length(birds)
 
     bird = birds(i,:); % bird = [x, y, v_x, v_y]
@@ -51,6 +53,13 @@ function [d] = dBirds(birds)
       v_y = -v_y * rand;
       % v_y = -(v_y ./ abs(v_y)) * rand_speed(1); % switch sign, rand magnitude
     end
+    % whos v_x;
+    % whos v_y;
+
+    % fprintf('d is [%4.2f, %4.2f, %4.2f, %4.2f]\n', v_x, v_y, 0,0);
+    % disp([v_x,v_y,0,0]);
+    d(i,:) = [v_x, v_y, 0, 0];
+
 
     %% Check max speed
     % if (v_x.^2 + v_y.^2 > max_speed^2)
@@ -61,11 +70,9 @@ function [d] = dBirds(birds)
     % end
   end
 
-  a_x = zeros(numBirds,1);
-  a_y = zeros(numBirds,1);
+
 
   % dBird = [v_x, v_y, a_x, a_y];
-  d = [v_x, v_y, a_x, a_y];
 
   % dx = @(birds) (rand(numBirds,1).*2 - 1) .* max_speed; % dx in [-max_speed, max_speed]
   % % dy = @(birds) rand_sign(:,2) .* sqrt(max_speed^2 - birds(:,3).^2); % pos or neg
