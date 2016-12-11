@@ -1,0 +1,217 @@
+%&pdflatex
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+\begin{document}
+\title{CS250 Final Project: Boids - A Swarm Intelligence Model}
+\date{December 6, 2016}
+\author{Zhanwen Chen\\Vassar College}
+\maketitle
+
+\section{Flocking: The Boids Distributed Behavior Model}
+
+\subsection{Motivation for the model}
+
+My final project aims to implement the boids model of swarming, created by
+Craig Reynolds to generate graphics of a flock of birds for animation
+in motion pictures. Instead of specifying the path of individual agents, the
+modeler specifies the behavior of each agent. Each bird has a specific set
+of behaviors when interacting with the
+
+% The actual thing
+
+\section{Follow the Leader}
+\subsection{Assumptions}
+  \begin{enumerate}
+    \item [] As the first attempt at a flocking model, I present
+      the following simplifying assumptions.
+
+    \item 2D geometric flight. Although Craig Reynolds' ACM SIGGRAPH paper proposed
+      3D geometric flight, his model is intended to produce 3D graphics instead
+      of researching swarming behaviors. Meanwhile, although visually
+      impressive, 3D flight necessitates motions roll and pitch, in addition to
+      yaw, which is equivalent to turn in 2D flight. In addition, 3D flight
+      requires a local frame of reference because of its complexity, which in
+      turn requires translation from local frames of reference to the global
+      frame of reference. With these additional implementation complexities,
+      however, an extra dimension does not enable the model to answer
+      more questions on intra-flock or flock-environment interactions. Thus,
+      the choice of 2D flight in place of 3D flight in boids model is an
+      easy one. As a result, we use a global frame of reference and geometric
+      flight.
+
+    \item Global perception. Each bird can perceive all variables in this
+      model, including other birds and the environment. When we consider the
+      alternative - localized perception, where birds have a sphere of
+      perception (particularly vision), global perception seems unrealistic,
+      although it simplifies our base model and serves a basis for comparison.
+      In subsequent models, we implement localized perception and explore
+      how changes in the range of perception impacts both intra-flock dynamics
+      and flock-environment interactions.
+
+    \item Position-oriented perception. Each bird has access to other birds'
+      current and last position. This implies that each bird does not have
+      access to others' current velocities but calculates their velocities
+      in the last iteration based on the difference between their current
+      positions and their positions in the last iteration. In other words,
+      birds has a memory containing two frames - the current iteration and the
+      last. The birds' latent velocity perception also makes it
+      difficult to predict the next position of other birds. Subsequent models
+      will change the size of memory, enabling them to average past velocities,
+      and thus make a smoothed prediction. We then explore how different memory
+      sizes affect flocking efficiency. Lastly, to simplify our model, we assume
+      birds do not perceive or calculate accelerations of others, even though
+      reality suggests otherwise.
+
+    \item A flock leader. Different flocking strategies can result in different
+      flocking outcomes. Two possibilities are leader-following and
+      density-following. Global perception enables leader-following because
+      each bird can identify the leader among the other birds, retrieve its
+      position, calculate the velocity needed to go to the leader, and actuate
+      to adopt that velocity. In subsequent models, birds will attempt to
+      navigate to a predicted future position of the leader in an attempt to
+      speed up the process of flocking. I will compare these two different
+      navigation strategies in terms of flocking speed and other dynamics.
+
+    \item Flock leader rotation. The environment will reassign flock leaders
+      in order to make the model dynamic. In the absense of external
+      stimulus such as environment obstacles and food sources, a change
+      in leadership is the only source of reordering the flock. It
+      also serves as a convenient tool for testing.
+
+
+    \item Velocity matching. Once a bird is in a flock, its goal is to match
+      the velocity of its flockmates. Consistent with the global perception
+      assumption in this base model, we define this goal as matching the
+      average velocity of the flock. In future models with localized
+      perception, we will modify this goal to matching velocity with
+      known adjacent flockmates.
+
+    \item Flock centering. If a bird is not in a flock, its goal is to
+      move closer to the leader of the flock (or a center mass in subsequent
+      models).
+
+    \item Collision avoidance. In its pursuit of velocity matching and flock
+      centering, a bird must not collide with another bird (which is likely
+      a flockmate). Velocity matching already contributes to the fulfillment
+      of this goal. Additionally, in future models, I attempt to include
+      environment obstacles as well in this endeavor.
+
+    \item The order of priority for these three agent goals is collision
+      avoidance, velocity matching, and flock centering. Collision avoidance
+      is a prerequisite for velocity matching and flock centering (or any
+      planned motion).
+
+    \item Goal-oriented behavior. If we treat these three behaviors as
+      discrete goals?
+
+  \end{enumerate}
+
+\subsection{Implementation}
+  \begin{enumerate}
+    \item Based on considerations from the previous section, we first specify
+      the bird object and the flock object. As the basic agent of this model,
+      birds have properties including position and velocity. In order to
+      determine state and flock membership, we also associate each bird with
+      an id.
+
+    \item Intertwined and conflicting goals. How to adjudicate conflict?
+      1. Abandon lower priority goal
+      2. Graded goal with composition and fitness
+
+    \item step-by-step:
+      1. $P_{leader} - P_{self}$ %% goal_3: flock centering
+      2. $v_{i} = max |v|$ with new direction parallel to $P_{leader} - P_{self}$ %% goal_3: flock centering
+      3. see if $v_{i}$ also satisfies velocity matching
+
+    \item A bird first attempts to fulfill its goal -
+      if ($goal_1$ and $goal_2$ and $goal_3$)
+        then do all three
+      elseif ($goal_1$ and $goal_2$)
+        then do 1 and 2
+      else
+        then do 1
+
+      $$composite_{goal} = composite_{g1} + composite_{g2} + composite_{g3}$$
+      max fitness over actuation variables =
+        $$root((composite_g1 - goal_1)^2$$
+          $$+ (composite_g1 - goal_2)^2$$
+          $$+ (composite_g1 - goal_3)^2)$$
+
+
+
+    \item We define the physical space a bird occupies as a square.
+    \item Each bird at iteration i has only its position and velocity.
+      $$Bird_{i,b} = [P_{i,b}, v_{i,b}]$$.
+    \item The update in each iteration is
+      $$dBird_{i,b} = [dP_{i,b}, dv_{i,b}]$$.
+    \item where $dv = a$.
+    \item So the invariant for each bird is
+      $$Bird_{i+1,b} = Bird_{i,b} + dBird_{i,b}$$, or
+      $$Bird_{i,b} = Bird_{i-1,b} + dBird_{i-1,b}$$
+
+    \item We consider implementing the three behaviors in order of precedence.
+
+    \item Collision detection.
+
+    \item Steering. Turning $-\frac{\pi}{2}$ (90 degrees to the right from
+      $(1,0)$ to $(0,-1)$ is $dv = (-1, -1))$.
+
+      Turning $\frac{\pi}{2}$ (90 degrees to the left from
+      $(1,0)$ to $(0,1)$ is $dv = (-1, 1))$.
+
+  \end{enumerate}
+
+
+\subsection{Questions}
+
+  \begin{enumerate}
+    \item [] Corresponding to our basic assumptions for this simplistic model,
+      we want to change them to extend our model.
+
+    \item (Question) Variable speed.
+
+    \item (Question) Localized Perception. I expect localized perception to slow down
+      the speed of flocking because the subroutine of steering towards the
+      center mass or the flock leader would no longer be possible without being
+      able to perceive them. Instead, a process of identifying the relative
+      density of neighboring agents would result in localized flocking. Based
+      on the phenomenon of localized flocking, I am also interested in exploring
+      the mechanism of local flocks into a bigger flock.
+
+    \item (Question) Localized Collision Detection.
+
+    \item (Question) Center Mass instead of flock leader
+
+    \item ?? (Question) Dynamic Steering. Can turn a range of degrees each step.
+
+    \item (Question) Change order of behaviors: (permutations of order).
+
+    \item (Question) Position perception instead of velocity perception.
+
+    \item Environment-flock/-bird interactions: Obstacles?
+
+    \item What am I measuring: flock size? Num of iterations it takes to achieve a full flock?
+
+    \item What is a flock: flock membership based on distance proximity between birds?
+      velocity proximity between birds?
+
+    \item
+      Affecting flocking behavior (speed to achieve full flock):
+      1. changing flocking strategy - center mass vs leader
+      2. interactions with the environment (obstacle, food)
+
+  \end{enumerate}
+
+
+
+% Bibliography Section
+\begin{thebibliography}{9}
+\bibitem{reynoldsarticle}
+Flocks, herds and schools: A distributed behavioral model,
+\\\texttt{http://dl.acm.org/citation.cfm?id=37406}
+\end{thebibliography}
+
+\end{document}

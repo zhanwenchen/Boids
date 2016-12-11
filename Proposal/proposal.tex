@@ -1,0 +1,67 @@
+%&pdflatex
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\renewcommand{\thesubsection}{\thesection.\alph{subsection}}
+
+\begin{document}
+\title{CS250 Final Project Proposal: Boids - A Swarm Intelligence Model}
+\date{November 23, 2016}
+\author{Zhanwen Chen\\Vassar College}
+\maketitle
+
+\section{The Boids Distributed Behavior Model}
+
+\subsection{Motivation for the model}
+
+My final project aims to implement the boids model of swarming, created by
+Craig Reynolds to generate graphics of a flock of birds for animation
+in motion pictures. Instead of specifying the path of individual agents, the
+modeler specifies the behavior of each agent.
+
+\subsection{The Boids Model}
+
+Components in the boids model include
+
+{\begin{enumerate}
+  \item [] Movement. The mechanism of movement in the boids model is 3D geometric flight.
+  In terms of coordinates, the model contains both global coordinates and local
+  coordinates (perception and action are localized). In terms of actions, the
+  basic operationsthe include roll (rotate around the z-axis, used for banking),
+  pitch (rotate around the x-axis), and yaw (rotate around the y-axis).
+  \item [] Behaviors. The three basic behaviors specified by the boids model are collision
+  avoidance, velocity matching, and flock centering, in order of precedence.
+  Collision avoidance and velocity matching both have an effect of avoiding
+  collision with flocking mates. Flock centering means an agent moves toward the
+  centroid of nearby flockmates. In addition, the acceleration of the flock is the
+  average of agents' acceleration.
+  \item [] Localized Perception. In the boids model, an agent's environmental variables
+  include the position, shape, and velocity (and even intention, see subsction
+  Deliberation, Intentions, and Emotions) of nearby flockmates within the agent's
+  sphere of vision.
+  \item [] Obstacle evasion. A crucial feature of the flock is group collision evation
+  of environment obstacles. Use steer-to-avoid to localize this behavior.
+\end{enumerate}}
+
+\section{Exploring and Extending the Boids Model}
+
+\subsection{Flying Between Skyscrapers}
+
+A basic task for a flock is navigating metropolitan landscapes. Implement the
+basic model and move the flock along city streets. Assume skyscrapers are
+infinitely tall.
+
+\subsection{Deliberation, Intentions, and Emotions}
+
+The existing boids model is reactive, using a set of predetermined instructions
+to plan the next action. Use "emotions" with Markov Chains to implement
+the Belief-Desire-Intention behavioral model.
+
+% Bibliography Section
+\begin{thebibliography}{9}
+\bibitem{reynoldsarticle}
+Flocks, herds and schools: A distributed behavioral model,
+\\\texttt{http://dl.acm.org/citation.cfm?id=37406}
+\end{thebibliography}
+
+\end{document}

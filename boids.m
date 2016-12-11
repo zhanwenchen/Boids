@@ -2,28 +2,37 @@
 %% CS250
 %% Final Project
 
-%% Environment variables
-sky_xlim = 100;
-sky_ylim = 100;
+numBirds = 20;
 
-%% Bird variables
+%% Bird vars
 max_speed = 20; %m/s
 
+%% Randomization funcs
+rand_sign = @(n) ones(n, 1) - floor(rand(n,1)*2)*2; % pick -1 or 1, n by 1
+rand_speed = @(n) (rand(n,1) - 0.5) * 2 * max_speed; % [-max_speed, max_speed]
+
+
+
+%% Environment vars
+sky_xlim = 200;
+sky_ylim = 200;
+
+% dx = @(birds) (rand(numBirds,1).*2 - 1) .* max_speed; % dx in [-max_speed, max_speed]
+% % dy = @(birds) rand_sign(:,2) .* sqrt(max_speed^2 - birds(:,3).^2); % pos or neg
+dy = @(birds) rand_sign(:,2) .* sqrt(abs(max_speed^2 - birds(:,3).^2)); % pos or neg
+% % dBird = [dx, dy, dv_x, dv_y]
+% dBird = @(bird) [dx(bird) dy(bird) ones(numBirds,1) ones(numBirds,1)];
+
 %% Init birds
-numBirds = 20;
-birds = rand(numBirds, 4); % bird has [x,y,v_x,v_y],
+birds = ones(numBirds, 4); % bird has [x,y,v_x,v_y],
 birds(:,1) = birds(:,1) .* (rand(numBirds,1) * sky_xlim);
 birds(:,2) = birds(:,2) .* (rand(numBirds,1) * sky_ylim);
-birds(:,3) = birds(:,3) .* (rand(numBirds,1) * max_speed);
-birds(:,4) = sqrt(max_speed^2 - birds(:,3).^2);
+birds(:,3) = rand_sign(numBirds) .* rand_speed(numBirds);
+birds(:,4) = rand_sign(numBirds) .* rand_speed(numBirds);
 
-birdsList{1} = birds;
-% dBirds =
-% dvx = @();
-% dvy = @();
-dx = @(x,y,v_x,v_y) rand*max_speed;
-dy = @(x,y,v_x,v_y) sqrt(rand*max_speed^2-dx^2);
-dBirds = @(x,y,v_x,v_y) [arrayfun(dx(x);dx(x,y,v_x,v_y);0;0];
+
+birdList = mat2cell(birds,ones(numBirds,1),4); % same thing as birds
+birdsList{1} = birds; % birds by frame
 
 numIterations = 200; %s
 
@@ -31,6 +40,10 @@ for i=2:numIterations
   %% Collision
   % for all other birds
   % if
-  birdsList{i} = birdsList{i-1}...
-                + dBirds(birds(:,1),birds(:,2),birds(:,3),birds(:,4));
+  % birdsList{i} = birdsList{i-1}...
+  %               + dBirds(birds(:,1),birds(:,2),birds(:,3),birds(:,4));
+  % birds = birds + dBirds();
+  birds = birds + dBirds(birds);
+  birdsList{i} = birds;
+
 end
