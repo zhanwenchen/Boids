@@ -1,17 +1,23 @@
-function [] = viz(birds,interval)
+%% viz(birds, interval)
+% --------------------
+% Input: birds, a
+function [] = viz(birdsList,interval)
 
 side_length = 1;
 
-  for i=1:interval:length(birds)
+  for i=1:interval:length(birdsList)
 
-    rectangle('Position',...
-              [birds{i}(1)-0.5*side_length,
-               birds{i}(2)-0.5*side_length,
-               side_length]);
-               side_length,
+    for j=1:length(birdsList{i})
+      rectangle('Position',...
+                [birdsList{i}(j,1),...
+                 birdsList{i}(j,2),...
+                 side_length,...
+                 side_length]);
+    end
+
+     xlim([0,100]);
+     ylim([0,100]);
+
+     w = waitforbuttonpress;
   end
-
-  xlim([-10,10]);
-  ylim([-10,10]);
-
 end
